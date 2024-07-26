@@ -25,7 +25,6 @@ contract Lender is Ownable {
     error AuctionNotEnded();
     error TokenNotApproved();
     error InsufficientBalance();
-    error CannotTheSamePool();
 
     /// @notice the maximum interest rate is 1000%
     uint256 public constant MAX_INTEREST_RATE = 100000;
@@ -234,7 +233,7 @@ contract Lender is Ownable {
         pools[poolId].maxLoanRatio = maxLoanRatio;
         emit PoolMaxLoanRatioUpdated(poolId, maxLoanRatio);
     }
-    //@audit what if owner update the interest rate right after the borrower borrow the loan?
+    //@audit what if owner 
     function updateInterestRate(bytes32 poolId, uint256 interestRate) external {
         if (pools[poolId].lender != msg.sender) revert Unauthorized();
         if (interestRate > MAX_INTEREST_RATE) revert PoolConfig();
@@ -472,7 +471,7 @@ contract Lender is Ownable {
             );
         }
     }
-    
+
     function buyLoan(uint256 loanId, bytes32 poolId) public {
         // get the loan info
         Loan memory loan = loans[loanId];
@@ -481,12 +480,6 @@ contract Lender is Ownable {
             revert AuctionNotStarted();
         if (block.timestamp > loan.auctionStartTimestamp + loan.auctionLength)
             revert AuctionEnded();
-         bytes32 oldPoolId = getPoolId(
-            loan.lender,
-            loan.loanToken,
-            loan.collateralToken
-        );
-        if(oldPoolId == poolId) revert CannotTheSamePool();
         // calculate the current interest rate
         uint256 timeElapsed = block.timestamp - loan.auctionStartTimestamp;
         uint256 currentAuctionRate = (MAX_INTEREST_RATE * timeElapsed) /
@@ -505,7 +498,13 @@ contract Lender is Ownable {
         // if they do have a big enough pool then transfer from their pool
         _updatePoolBalance(poolId, pools[poolId].poolBalance - totalDebt);
         pools[poolId].outstandingLoans += totalDebt;
-       
+
+        // now update the pool balance of the old lender
+        bytes32 oldPoolId = getPoolId(
+            loan.lender,
+            loan.loanToken,
+            loan.collateralToken
+        );
         _updatePoolBalance(
             oldPoolId,
             pools[oldPoolId].poolBalance + loan.debt + lenderInterest

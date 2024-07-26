@@ -25,7 +25,7 @@ contract Lender is Ownable {
     error AuctionNotEnded();
     error TokenNotApproved();
     error InsufficientBalance();
-    error CannotTheSamePool();
+    error Can
 
     /// @notice the maximum interest rate is 1000%
     uint256 public constant MAX_INTEREST_RATE = 100000;
@@ -486,7 +486,7 @@ contract Lender is Ownable {
             loan.loanToken,
             loan.collateralToken
         );
-        if(oldPoolId == poolId) revert CannotTheSamePool();
+        if(oldPoolId == poolId) revert Unauthorized();
         // calculate the current interest rate
         uint256 timeElapsed = block.timestamp - loan.auctionStartTimestamp;
         uint256 currentAuctionRate = (MAX_INTEREST_RATE * timeElapsed) /

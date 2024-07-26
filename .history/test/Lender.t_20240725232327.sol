@@ -231,16 +231,15 @@ contract LenderTest is Test{
         );
 
         // warp to middle of auction
-         vm.warp(block.timestamp + 12 hours);
+        
 
         vm.startPrank(BORROWER);
 
         lender.buyLoan(0, poolIds[0]);
 
-        (, , , ,uint256 poolBalance, , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
+        (, , , , , , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
 
         assertEq(auctionStartTimestamp, type(uint256).max);
-        console.log(poolBalance);
 
         vm.startPrank(LENDER1);
 

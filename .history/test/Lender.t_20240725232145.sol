@@ -212,7 +212,7 @@ contract LenderTest is Test{
      function test_buyLoanWithTheSamePool() public {
         test_borrow();
         // accrue interest
-         vm.warp(3 days);
+        vm.warp(block.timestamp + 364 days + 12 hours);
         // kick off auction
         vm.startPrank(LENDER1);
 
@@ -231,18 +231,17 @@ contract LenderTest is Test{
         );
 
         // warp to middle of auction
-         vm.warp(block.timestamp + 12 hours);
+        vm.warp(block.timestamp + 23 hours + 59 minutes);
 
-        vm.startPrank(BORROWER);
+        vm.startPrank();
 
         lender.buyLoan(0, poolIds[0]);
 
-        (, , , ,uint256 poolBalance, , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
+        (, , , , , , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
 
         assertEq(auctionStartTimestamp, type(uint256).max);
-        console.log(poolBalance);
 
-        vm.startPrank(LENDER1);
+        vm.startPrank(lender1);
 
         // Lender1 can't seize the loan anymore because it has been rebought to the same pool before auction ended
         lender.seizeLoan(loanIds);

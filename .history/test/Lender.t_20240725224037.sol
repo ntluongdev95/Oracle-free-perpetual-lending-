@@ -209,44 +209,18 @@ contract LenderTest is Test{
 
      }
 
-     function test_buyLoanWithTheSamePool() public {
-        test_borrow();
-        // accrue interest
-         vm.warp(3 days);
-        // kick off auction
-        vm.startPrank(LENDER1);
-
+     function test_RevertAuctionNotStarted () public{
+         test_borrow();
+         vm.warp(type(uint256).max);
         uint256[] memory loanIds = new uint256[](1);
         loanIds[0] = 0;
-
+         vm.startPrank(LENDER1);
         lender.startAuction(loanIds);
-
-        bytes32[] memory poolIds = new bytes32[](1);
-        poolIds[0] = keccak256(
-            abi.encode(
-                address(LENDER1),
-                address(loanToken),
-                address(collateralToken)
-            )
-        );
-
-        // warp to middle of auction
-         vm.warp(block.timestamp + 12 hours);
-
-        vm.startPrank(BORROWER);
-
-        lender.buyLoan(0, poolIds[0]);
-
-        (, , , ,uint256 poolBalance, , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
-
-        assertEq(auctionStartTimestamp, type(uint256).max);
-        console.log(poolBalance);
-
-        vm.startPrank(LENDER1);
-
-        // Lender1 can't seize the loan anymore because it has been rebought to the same pool before auction ended
-        lender.seizeLoan(loanIds);
-}
-
+        vm.expectRevert(Lender.AuctionNotStarted.selector);
+        vm.startPrank(LENDER2);
+        vm.warp(block.timestamp + 2 days);
+         bytes32 poolId = lender.getPoolId(LENDER1, address(loanToken), address(collateralToken));
+         lender.buyLoan(0, poolId);
+     }
 
 }

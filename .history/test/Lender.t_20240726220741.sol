@@ -240,7 +240,7 @@ contract LenderTest is Test{
         (, , , ,uint256 poolBalance, , , , uint256 auctionStartTimestamp, ) = lender.loans(0);
 
         assertEq(auctionStartTimestamp, type(uint256).max);
-        console.log(poolBalance);
+        
 
         vm.startPrank(LENDER1);
 
