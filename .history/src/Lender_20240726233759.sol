@@ -234,7 +234,7 @@ contract Lender is Ownable {
         pools[poolId].maxLoanRatio = maxLoanRatio;
         emit PoolMaxLoanRatioUpdated(poolId, maxLoanRatio);
     }
-    
+    //@audit what if owner update the interest rate right after the borrower borrow the loan?
     function updateInterestRate(bytes32 poolId, uint256 interestRate) external {
         if (pools[poolId].lender != msg.sender) revert Unauthorized();
         if (interestRate > MAX_INTEREST_RATE) revert PoolConfig();
